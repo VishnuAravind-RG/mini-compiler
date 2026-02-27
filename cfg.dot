@@ -1,0 +1,14 @@
+digraph {
+	B0 [label="x = 5"]
+	B1 [label="LABEL L1
+IFNOT x GOTO L2"]
+	B2 [label="t1 = x - 1
+x = t1
+GOTO L1"]
+	B3 [label="LABEL L2
+PRINT x"]
+	B0 -> B1
+	B1 -> B3
+	B1 -> B2
+	B2 -> B1
+}

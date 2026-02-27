@@ -1,0 +1,31 @@
+digraph {
+	0 [label=BLOCK]
+	1 [label="DECL x"]
+	0 -> 1
+	2 [label=ASSIGN]
+	3 [label=x]
+	4 [label=5]
+	2 -> 3
+	2 -> 4
+	0 -> 2
+	5 [label=WHILE]
+	6 [label=x]
+	7 [label=BLOCK]
+	8 [label=ASSIGN]
+	9 [label=x]
+	10 [label="-"]
+	11 [label=x]
+	12 [label=1]
+	10 -> 11
+	10 -> 12
+	8 -> 9
+	8 -> 10
+	7 -> 8
+	5 -> 6
+	5 -> 7
+	0 -> 5
+	13 [label=PRINT]
+	14 [label=x]
+	13 -> 14
+	0 -> 13
+}
