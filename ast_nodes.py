@@ -37,3 +37,31 @@ class While(AST):
     def __init__(self, cond, body):
         self.cond = cond
         self.body = body
+
+# NEW: if / if-else
+class If(AST):
+    def __init__(self, cond, body):
+        self.cond = cond
+        self.body = body
+
+class IfElse(AST):
+    def __init__(self, cond, then_body, else_body):
+        self.cond      = cond
+        self.then_body = then_body
+        self.else_body = else_body
+
+# NEW: functions
+class FuncDef(AST):
+    def __init__(self, name, params, body):
+        self.name   = name
+        self.params = params
+        self.body   = body
+
+class FuncCall(AST):
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args
+
+class Return(AST):
+    def __init__(self, expr):
+        self.expr = expr

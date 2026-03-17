@@ -2,94 +2,91 @@
 
 from graphviz import Digraph
 from ast_nodes import *
-import subprocess
-
-
-# ============================================================
-# AST VISUALIZER
-# ============================================================
+import subprocess, shutil
 
 class ASTVisualizer:
 
     def __init__(self):
-        self.dot = Digraph()
-        self.node_count = 0
+        self.dot     = Digraph()
+        self.counter = 0
 
-    def new_node(self, label):
-        node_id = str(self.node_count)
-        self.dot.node(node_id, label)
-        self.node_count += 1
-        return node_id
-
-    # ------------------------------------------------------------
-    # Visitor
-    # ------------------------------------------------------------
+    def new_id(self):
+        self.counter += 1
+        return f"n{self.counter}"
 
     def visit(self, node):
+        nid = self.new_id()
 
         if isinstance(node, Block):
-            current = self.new_node("BLOCK")
+            self.dot.node(nid, "Block")
             for child in node.children:
-                child_id = self.visit(child)
-                self.dot.edge(current, child_id)
-            return current
-
-        elif isinstance(node, VarDecl):
-            return self.new_node(f"DECL {node.token.value}")
-
-        elif isinstance(node, Assign):
-            current = self.new_node("ASSIGN")
-            left = self.new_node(node.left.token.value)
-            right = self.visit(node.right)
-            self.dot.edge(current, left)
-            self.dot.edge(current, right)
-            return current
-
-        elif isinstance(node, BinOp):
-            current = self.new_node(node.op.value)
-            left = self.visit(node.left)
-            right = self.visit(node.right)
-            self.dot.edge(current, left)
-            self.dot.edge(current, right)
-            return current
+                self.dot.edge(nid, self.visit(child))
 
         elif isinstance(node, Num):
-            return self.new_node(str(node.token.value))
+            self.dot.node(nid, str(node.token.value))
 
         elif isinstance(node, Var):
-            return self.new_node(node.token.value)
+            self.dot.node(nid, str(node.token.value))
+
+        elif isinstance(node, BinOp):
+            self.dot.node(nid, node.op.value)
+            self.dot.edge(nid, self.visit(node.left))
+            self.dot.edge(nid, self.visit(node.right))
+
+        elif isinstance(node, Assign):
+            self.dot.node(nid, "=")
+            self.dot.edge(nid, self.visit(node.left))
+            self.dot.edge(nid, self.visit(node.right))
+
+        elif isinstance(node, VarDecl):
+            self.dot.node(nid, f"int {node.token.value}")
 
         elif isinstance(node, Print):
-            current = self.new_node("PRINT")
-            expr = self.visit(node.expr)
-            self.dot.edge(current, expr)
-            return current
+            self.dot.node(nid, "print")
+            self.dot.edge(nid, self.visit(node.expr))
 
         elif isinstance(node, While):
-            current = self.new_node("WHILE")
-            cond = self.visit(node.cond)
-            body = self.visit(node.body)
-            self.dot.edge(current, cond)
-            self.dot.edge(current, body)
-            return current
+            self.dot.node(nid, "while")
+            self.dot.edge(nid, self.visit(node.cond), label="cond")
+            self.dot.edge(nid, self.visit(node.body), label="body")
+
+        elif isinstance(node, If):
+            self.dot.node(nid, "if")
+            self.dot.edge(nid, self.visit(node.cond), label="cond")
+            self.dot.edge(nid, self.visit(node.body), label="then")
+
+        elif isinstance(node, IfElse):
+            self.dot.node(nid, "if-else")
+            self.dot.edge(nid, self.visit(node.cond),      label="cond")
+            self.dot.edge(nid, self.visit(node.then_body), label="then")
+            self.dot.edge(nid, self.visit(node.else_body), label="else")
+
+        elif isinstance(node, FuncDef):
+            params = ", ".join(node.params)
+            self.dot.node(nid, f"def {node.name}({params})")
+            self.dot.edge(nid, self.visit(node.body), label="body")
+
+        elif isinstance(node, FuncCall):
+            self.dot.node(nid, f"call {node.name}")
+            for i, arg in enumerate(node.args):
+                self.dot.edge(nid, self.visit(arg), label=f"arg{i+1}")
+
+        elif isinstance(node, Return):
+            self.dot.node(nid, "return")
+            self.dot.edge(nid, self.visit(node.expr))
 
         else:
-            return self.new_node("UNKNOWN")
+            self.dot.node(nid, "?")
 
-    # ------------------------------------------------------------
-    # Render (Manual dot execution)
-    # ------------------------------------------------------------
+        return nid
 
     def render(self, tree, filename="ast"):
         self.visit(tree)
-
         dot_file = filename + ".dot"
         png_file = filename + ".png"
-
         self.dot.save(dot_file)
-
-        dot_path = r"C:\Users\TEMP.WINSERVER.194\Desktop\windows_10_cmake_Release_Graphviz-14.1.2-win64\Graphviz-14.1.2-win64\bin\dot.exe"
-
+        dot_path = shutil.which("dot")
+        if not dot_path:
+            raise Exception("Graphviz 'dot' not found.")
         subprocess.run([dot_path, "-Tpng", dot_file, "-o", png_file], check=True)
-
-        print(f"{png_file} generated successfully.")
+        print(f"{png_file} generated.")

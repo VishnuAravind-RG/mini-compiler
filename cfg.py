@@ -3,6 +3,7 @@
 from ir import IRInstruction
 from graphviz import Digraph
 import subprocess
+import shutil
 
 
 # ============================================================
@@ -134,7 +135,9 @@ class CFGVisualizer:
 
         dot.save(dot_file)
 
-        dot_path = r"C:\Users\TEMP.WINSERVER.194\Desktop\windows_10_cmake_Release_Graphviz-14.1.2-win64\Graphviz-14.1.2-win64\bin\dot.exe"
+        dot_path = shutil.which("dot")
+        if not dot_path:
+            raise Exception("Graphviz 'dot' not found. Install it and ensure it's in PATH.")
 
         subprocess.run([dot_path, "-Tpng", dot_file, "-o", png_file], check=True)
 
