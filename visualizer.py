@@ -4,6 +4,7 @@ from graphviz import Digraph
 from ast_nodes import *
 import subprocess, shutil
 
+
 class ASTVisualizer:
 
     def __init__(self):
@@ -25,8 +26,15 @@ class ASTVisualizer:
         elif isinstance(node, Num):
             self.dot.node(nid, str(node.token.value))
 
+        elif isinstance(node, FloatNum):
+            self.dot.node(nid, str(node.token.value))
+
         elif isinstance(node, Var):
             self.dot.node(nid, str(node.token.value))
+
+        elif isinstance(node, UnaryOp):
+            self.dot.node(nid, f"unary {node.op.value}")
+            self.dot.edge(nid, self.visit(node.expr))
 
         elif isinstance(node, BinOp):
             self.dot.node(nid, node.op.value)
@@ -39,7 +47,19 @@ class ASTVisualizer:
             self.dot.edge(nid, self.visit(node.right))
 
         elif isinstance(node, VarDecl):
-            self.dot.node(nid, f"int {node.token.value}")
+            self.dot.node(nid, f"{node.var_type} {node.token.value}")
+
+        elif isinstance(node, ArrayDecl):
+            self.dot.node(nid, f"{node.var_type} {node.name}[{node.size}]")
+
+        elif isinstance(node, ArrayAccess):
+            self.dot.node(nid, f"{node.name}[...]")
+            self.dot.edge(nid, self.visit(node.index), label="idx")
+
+        elif isinstance(node, ArrayAssign):
+            self.dot.node(nid, f"{node.name}[...]=")
+            self.dot.edge(nid, self.visit(node.index), label="idx")
+            self.dot.edge(nid, self.visit(node.value), label="val")
 
         elif isinstance(node, Print):
             self.dot.node(nid, "print")
@@ -48,6 +68,13 @@ class ASTVisualizer:
         elif isinstance(node, While):
             self.dot.node(nid, "while")
             self.dot.edge(nid, self.visit(node.cond), label="cond")
+            self.dot.edge(nid, self.visit(node.body), label="body")
+
+        elif isinstance(node, For):
+            self.dot.node(nid, "for")
+            self.dot.edge(nid, self.visit(node.init), label="init")
+            self.dot.edge(nid, self.visit(node.cond), label="cond")
+            self.dot.edge(nid, self.visit(node.step), label="step")
             self.dot.edge(nid, self.visit(node.body), label="body")
 
         elif isinstance(node, If):
@@ -62,7 +89,7 @@ class ASTVisualizer:
             self.dot.edge(nid, self.visit(node.else_body), label="else")
 
         elif isinstance(node, FuncDef):
-            params = ", ".join(node.params)
+            params = ", ".join(f"{t} {n}" for n, t in node.params)
             self.dot.node(nid, f"def {node.name}({params})")
             self.dot.edge(nid, self.visit(node.body), label="body")
 
@@ -87,6 +114,6 @@ class ASTVisualizer:
         self.dot.save(dot_file)
         dot_path = shutil.which("dot")
         if not dot_path:
-            raise Exception("Graphviz 'dot' not found.")
+            raise Exception("Graphviz 'dot' not found. Install with: sudo apt install graphviz")
         subprocess.run([dot_path, "-Tpng", dot_file, "-o", png_file], check=True)
         print(f"{png_file} generated.")

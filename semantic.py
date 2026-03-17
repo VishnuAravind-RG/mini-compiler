@@ -2,11 +2,22 @@
 
 from ast_nodes import *
 
+
+class SemanticError(Exception):
+    pass
+
+
 class SemanticAnalyzer:
 
     def __init__(self):
-        self.scopes   = [{}]           # stack of dicts
-        self.functions = {}            # name -> FuncDef
+        self.scopes    = [{}]       # stack of {name: type}
+        self.functions = {}         # name -> FuncDef
+        self.arrays    = {}         # name -> (size, type)
+        self.errors    = []
+
+    # ----------------------------------------------------------------
+    # Scope helpers
+    # ----------------------------------------------------------------
 
     def enter_scope(self):
         self.scopes.append({})
@@ -14,17 +25,28 @@ class SemanticAnalyzer:
     def exit_scope(self):
         self.scopes.pop()
 
-    def declare(self, name):
+    def declare(self, name, vtype="int"):
         if name in self.scopes[-1]:
-            print(f"[Semantic Warning] Redeclaration of '{name}'")
-        self.scopes[-1][name] = "int"
+            self._warn(f"Redeclaration of '{name}'")
+        self.scopes[-1][name] = vtype
 
     def lookup(self, name):
         for scope in reversed(self.scopes):
             if name in scope:
-                return True
-        print(f"[Semantic Error] Undeclared variable '{name}'")
-        return False
+                return scope[name]
+        self._error(f"Undeclared variable '{name}'")
+        return None
+
+    def _error(self, msg):
+        self.errors.append(f"[Error] {msg}")
+        print(f"[Semantic Error] {msg}")
+
+    def _warn(self, msg):
+        print(f"[Semantic Warning] {msg}")
+
+    # ----------------------------------------------------------------
+    # Visitor
+    # ----------------------------------------------------------------
 
     def visit(self, node):
 
@@ -35,7 +57,22 @@ class SemanticAnalyzer:
             self.exit_scope()
 
         elif isinstance(node, VarDecl):
-            self.declare(node.token.value)
+            self.declare(node.token.value, node.var_type)
+
+        elif isinstance(node, ArrayDecl):
+            self.arrays[node.name] = (node.size, node.var_type)
+            self.declare(node.name, node.var_type + "[]")
+
+        elif isinstance(node, ArrayAccess):
+            if node.name not in self.arrays:
+                self._error(f"'{node.name}' is not an array")
+            self.visit(node.index)
+
+        elif isinstance(node, ArrayAssign):
+            if node.name not in self.arrays:
+                self._error(f"'{node.name}' is not an array")
+            self.visit(node.index)
+            self.visit(node.value)
 
         elif isinstance(node, Assign):
             self.lookup(node.left.token.value)
@@ -46,6 +83,12 @@ class SemanticAnalyzer:
 
         elif isinstance(node, Num):
             pass
+
+        elif isinstance(node, FloatNum):
+            pass
+
+        elif isinstance(node, UnaryOp):
+            self.visit(node.expr)
 
         elif isinstance(node, BinOp):
             self.visit(node.left)
@@ -58,7 +101,14 @@ class SemanticAnalyzer:
             self.visit(node.cond)
             self.visit(node.body)
 
-        # NEW: if / if-else
+        elif isinstance(node, For):
+            self.enter_scope()
+            self.visit(node.init)
+            self.visit(node.cond)
+            self.visit(node.step)
+            self.visit(node.body)
+            self.exit_scope()
+
         elif isinstance(node, If):
             self.visit(node.cond)
             self.visit(node.body)
@@ -68,18 +118,24 @@ class SemanticAnalyzer:
             self.visit(node.then_body)
             self.visit(node.else_body)
 
-        # NEW: functions
         elif isinstance(node, FuncDef):
             self.functions[node.name] = node
             self.enter_scope()
-            for p in node.params:
-                self.declare(p)
+            for pname, ptype in node.params:
+                self.declare(pname, ptype)
             self.visit(node.body)
             self.exit_scope()
 
         elif isinstance(node, FuncCall):
-            if node.name not in self.functions and node.name != "print":
-                print(f"[Semantic Error] Undefined function '{node.name}'")
+            if node.name not in self.functions:
+                self._error(f"Undefined function '{node.name}'")
+            else:
+                expected = len(self.functions[node.name].params)
+                got      = len(node.args)
+                if expected != got:
+                    self._error(
+                        f"Function '{node.name}' expects {expected} args, got {got}"
+                    )
             for arg in node.args:
                 self.visit(arg)
 

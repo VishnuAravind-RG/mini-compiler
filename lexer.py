@@ -7,6 +7,13 @@ class Token:
         self.line   = line
         self.column = column
 
+    def __repr__(self):
+        return f"Token({self.type}, {self.value!r}, {self.line}:{self.column})"
+
+
+class LexerError(Exception):
+    pass
+
 
 class Lexer:
 
@@ -21,9 +28,9 @@ class Lexer:
         if self.current_char == "\n":
             self.line  += 1
             self.column = 0
-        self.pos        += 1
-        self.column     += 1
-        self.current_char = self.text[self.pos] if self.pos < len(self.text) else None
+        self.pos          += 1
+        self.column       += 1
+        self.current_char  = self.text[self.pos] if self.pos < len(self.text) else None
 
     def peek(self):
         nxt = self.pos + 1
@@ -33,34 +40,53 @@ class Lexer:
         while self.current_char and self.current_char.isspace():
             self.advance()
 
-    def skip_comment(self):
-        # single-line comments //
+    def skip_line_comment(self):
         while self.current_char and self.current_char != "\n":
             self.advance()
 
+    def skip_block_comment(self):            # T1: /* ... */
+        self.advance(); self.advance()       # consume /*
+        while self.current_char:
+            if self.current_char == "*" and self.peek() == "/":
+                self.advance(); self.advance()
+                return
+            self.advance()
+        raise LexerError(f"Unterminated block comment at line {self.line}")
+
     def number(self):
         start_col = self.column
-        value = ""
+        value     = ""
+        is_float  = False
         while self.current_char and self.current_char.isdigit():
             value += self.current_char
             self.advance()
+        if self.current_char == "." and self.peek() and self.peek().isdigit():
+            is_float = True
+            value   += self.current_char
+            self.advance()
+            while self.current_char and self.current_char.isdigit():
+                value += self.current_char
+                self.advance()
+        if is_float:
+            return Token("FLOAT", float(value), self.line, start_col)
         return Token("INTEGER", int(value), self.line, start_col)
 
     def identifier(self):
         start_col = self.column
-        value = ""
+        value     = ""
         while self.current_char and (self.current_char.isalnum() or self.current_char == "_"):
             value += self.current_char
             self.advance()
-
         keywords = {
             "int":    "INT",
+            "float":  "FLOAT_TYPE",           # T1
             "print":  "PRINT",
             "while":  "WHILE",
-            "if":     "IF",       # NEW
-            "else":   "ELSE",     # NEW
-            "def":    "DEF",      # NEW
-            "return": "RETURN",   # NEW
+            "for":    "FOR",                  # T1
+            "if":     "IF",
+            "else":   "ELSE",
+            "def":    "DEF",
+            "return": "RETURN",
         }
         return Token(keywords.get(value, "ID"), value, self.line, start_col)
 
@@ -71,12 +97,19 @@ class Lexer:
                 self.skip_whitespace()
                 continue
 
-            # skip single-line comments
+            # comments
             if self.current_char == "/" and self.peek() == "/":
-                self.skip_comment()
+                self.skip_line_comment()
+                continue
+            if self.current_char == "/" and self.peek() == "*":
+                self.skip_block_comment()
                 continue
 
             if self.current_char.isdigit():
+                return self.number()
+
+            # float starting with dot  .5
+            if self.current_char == "." and self.peek() and self.peek().isdigit():
                 return self.number()
 
             if self.current_char.isalpha() or self.current_char == "_":
@@ -84,44 +117,32 @@ class Lexer:
 
             start_col = self.column
 
-            # two-char tokens first
-            if self.current_char == "=" and self.peek() == "=":
-                self.advance(); self.advance()
-                return Token("EQ", "==", self.line, start_col)
-
-            if self.current_char == "!" and self.peek() == "=":
-                self.advance(); self.advance()
-                return Token("NEQ", "!=", self.line, start_col)
-
-            if self.current_char == "<" and self.peek() == "=":
-                self.advance(); self.advance()
-                return Token("LTE", "<=", self.line, start_col)
-
-            if self.current_char == ">" and self.peek() == "=":
-                self.advance(); self.advance()
-                return Token("GTE", ">=", self.line, start_col)
-
-            single_tokens = {
-                "=": "ASSIGN",
-                "+": "PLUS",
-                "-": "MINUS",
-                "*": "MUL",
-                "/": "DIV",
-                "(": "LPAREN",
-                ")": "RPAREN",
-                "{": "LBRACE",
-                "}": "RBRACE",
-                ";": "SEMI",
-                ",": "COMMA",   # NEW – for func params/args
-                "<": "LT",      # NEW
-                ">": "GT",      # NEW
+            # two-char tokens
+            two = {
+                "==": "EQ",  "!=": "NEQ",
+                "<=": "LTE", ">=": "GTE",
             }
+            ch2 = self.current_char + (self.peek() or "")
+            if ch2 in two:
+                self.advance(); self.advance()
+                return Token(two[ch2], ch2, self.line, start_col)
 
-            if self.current_char in single_tokens:
+            single = {
+                "=": "ASSIGN", "+": "PLUS",  "-": "MINUS",
+                "*": "MUL",    "/": "DIV",   "%": "MOD",   # T1: modulo
+                "(": "LPAREN", ")": "RPAREN",
+                "{": "LBRACE", "}": "RBRACE",
+                "[": "LBRACKET", "]": "RBRACKET",           # T2: arrays
+                ";": "SEMI",   ",": "COMMA",
+                "<": "LT",     ">": "GT",
+            }
+            if self.current_char in single:
                 char = self.current_char
                 self.advance()
-                return Token(single_tokens[char], char, self.line, start_col)
+                return Token(single[char], char, self.line, start_col)
 
-            raise Exception(f"Invalid character '{self.current_char}' at {self.line}:{self.column}")
+            raise LexerError(
+                f"Invalid character '{self.current_char}' at line {self.line}, column {self.column}"
+            )
 
         return Token("EOF", None, self.line, self.column)

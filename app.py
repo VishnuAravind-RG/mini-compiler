@@ -1,77 +1,110 @@
 # app.py  —  Flask Web UI for Mini Compiler
 
 import os, sys, io, traceback, tempfile
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, request, jsonify, render_template, send_file
 
-from lexer      import Lexer
-from parser     import Parser
-from semantic   import SemanticAnalyzer
-from optimizer  import ASTOptimizer, IROptimizer
-from ir         import IRGenerator
-from cfg        import CFGBuilder, CFGVisualizer
-from visualizer import ASTVisualizer
+from lexer          import Lexer
+from parser         import Parser
+from semantic       import SemanticAnalyzer
+from optimizer      import ASTOptimizer, IROptimizer
+from ir             import IRGenerator
+from cfg            import CFGBuilder, CFGVisualizer
+from visualizer     import ASTVisualizer
+from x86gen         import X86Generator
+from error_handler  import ErrorHandler
 
-app = Flask(__name__)
+app      = Flask(__name__)
+WORK_DIR = tempfile.mkdtemp()
 
-WORK_DIR = tempfile.mkdtemp()   # where we write ast.png / cfg.png
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
 @app.route("/compile", methods=["POST"])
 def compile_route():
     source = request.json.get("code", "")
+    eh     = ErrorHandler(source)
 
     try:
-        # 1. lex + parse
-        lexer  = Lexer(source)
-        parser = Parser(lexer)
-        tree   = parser.parse()
+        # ── 1. Lex + Parse ────────────────────────────────────────
+        try:
+            tree = Parser(Lexer(source)).parse()
+        except Exception as e:
+            eh.parse_exception(e, "Parser")
+            return jsonify(errors=eh.to_list(), stage="parse")
 
-        # 2. semantic
-        SemanticAnalyzer().visit(tree)
+        # ── 2. Semantic Analysis ──────────────────────────────────
+        analyzer = SemanticAnalyzer()
+        analyzer.visit(tree)
+        for err in analyzer.errors:
+            eh.add("Semantic", err)
 
-        # 3. optimize AST
-        tree = ASTOptimizer().visit(tree)
+        # ── 3. AST Optimization ───────────────────────────────────
+        try:
+            tree = ASTOptimizer().visit(tree)
+        except Exception as e:
+            eh.parse_exception(e, "Optimizer")
+            return jsonify(errors=eh.to_list(), stage="optimize")
 
-        # 4. AST image
-        ast_vis = ASTVisualizer()
-        ast_vis.render(tree, os.path.join(WORK_DIR, "ast"))
+        # ── 4. AST Visualization ──────────────────────────────────
+        try:
+            ASTVisualizer().render(tree, os.path.join(WORK_DIR, "ast"))
+        except Exception:
+            pass  # non-fatal
 
-        # 5. IR
+        # ── 5. IR Generation ──────────────────────────────────────
         ir_gen       = IRGenerator()
         instructions = ir_gen.generate(tree)
         ir_lines     = [str(i) for i in instructions]
 
-        # 6. CFG
+        # ── 6. IR Optimization ───────────────────────────────────
+        old, sys.stdout = sys.stdout, io.StringIO()
+        opt_lines = IROptimizer().optimize(ir_lines)
+        sys.stdout = old
+
+        # ── 7. CFG ───────────────────────────────────────────────
         cfg_builder = CFGBuilder(instructions)
         blocks      = cfg_builder.build()
-
-        # 7. CFG image
-        CFGVisualizer(blocks).render(os.path.join(WORK_DIR, "cfg"))
-
-        # 8. optimized IR (for display)
-        buf = io.StringIO()
-        old_stdout, sys.stdout = sys.stdout, buf
-        opt_lines = IROptimizer().optimize(ir_lines)
-        sys.stdout = old_stdout
+        try:
+            CFGVisualizer(blocks).render(os.path.join(WORK_DIR, "cfg"))
+        except Exception:
+            pass
 
         cfg_data = [
             {
-                "name": b.name,
+                "name":         b.name,
                 "instructions": [str(i) for i in b.instructions],
-                "successors": [s.name for s in b.successors],
+                "successors":   [s.name for s in b.successors],
             }
             for b in blocks
         ]
 
-        return jsonify(ir=ir_lines, cfg=cfg_data)
+        # ── 8. x86-64 Assembly Generation ────────────────────────
+        x86 = ""
+        try:
+            gen = X86Generator(instructions)
+            x86 = gen.generate()
+        except Exception as e:
+            x86 = f"; x86 generation error: {e}"
 
-    except Exception as e:
-        return jsonify(error=traceback.format_exc(limit=4))
+        return jsonify(
+            ir        = ir_lines,
+            ir_opt    = opt_lines,
+            cfg       = cfg_data,
+            x86       = x86,
+            errors    = eh.to_list(),
+            warnings  = analyzer.errors,
+        )
+
+    except Exception:
+        tb = traceback.format_exc(limit=6)
+        eh.add("Internal", tb)
+        return jsonify(errors=eh.to_list(), stage="internal")
+
 
 @app.route("/image/<string:name>")
 def serve_image(name):
@@ -81,6 +114,7 @@ def serve_image(name):
     if not os.path.exists(path):
         return "not compiled yet", 404
     return send_file(path, mimetype="image/png")
+
 
 if __name__ == "__main__":
     print(f"\n  Mini Compiler Studio → http://127.0.0.1:5000\n")
