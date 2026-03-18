@@ -1,0 +1,11 @@
+# Create .gitignore
+echo "venv/
+__pycache__/
+*.pyc
+*.dot
+*.png
+.vscode/
+*.egg-info/
+dist/
+build/
+" > .gitignore

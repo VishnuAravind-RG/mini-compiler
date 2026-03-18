@@ -177,6 +177,10 @@ class IRGenerator:
 
         if isinstance(node, UnaryOp):
             val = self.eval_expr(node.expr)
+            if node.op.type == "PLUS":
+                # unary plus — no operation needed, just return the value
+                return val
+            # unary minus
             tmp = self.new_temp()
             self.emit("neg", arg1=val, result=tmp)
             return tmp

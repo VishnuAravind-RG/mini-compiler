@@ -200,7 +200,7 @@
             font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--muted);
+            color: #475569;
             padding: 0 14px 8px;
         }
 
@@ -212,7 +212,7 @@
             cursor: pointer;
             font-family: var(--mono);
             font-size: 11px;
-            color: var(--muted);
+            color: #64748b;
             border-left: 2px solid transparent;
             transition: all .12s;
         }
@@ -248,7 +248,7 @@
             gap: 7px;
             font-family: var(--mono);
             font-size: 9px;
-            color: var(--muted);
+            color: #64748b;
         }
 
         .sb-feat-row .dot {
@@ -270,7 +270,7 @@
             justify-content: space-between;
             font-family: var(--mono);
             font-size: 9px;
-            color: var(--muted);
+            color: #7c8fa6;
             padding: 3px 0;
         }
 
@@ -964,6 +964,362 @@
             animation: fadein .15s ease both
         }
 
+        /* pipeline trace */
+        .phase-card {
+            margin-bottom: 14px;
+            border-radius: 7px;
+            overflow: hidden;
+            border: 1px solid var(--border)
+        }
+
+        .phase-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            cursor: pointer;
+            background: var(--bg3);
+            font-family: var(--mono);
+            font-size: 11px;
+            transition: background .12s;
+        }
+
+        .phase-head:hover {
+            background: var(--bg4)
+        }
+
+        .phase-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .phase-num.ok {
+            background: rgba(52, 211, 153, .2);
+            color: var(--c3);
+            border: 1px solid rgba(52, 211, 153, .3)
+        }
+
+        .phase-num.warn {
+            background: rgba(250, 204, 21, .2);
+            color: var(--c6);
+            border: 1px solid rgba(250, 204, 21, .3)
+        }
+
+        .phase-num.error {
+            background: rgba(248, 113, 113, .2);
+            color: var(--c5);
+            border: 1px solid rgba(248, 113, 113, .3)
+        }
+
+        .phase-title {
+            color: var(--text);
+            font-weight: 500;
+            flex: 1
+        }
+
+        .phase-status-ok {
+            color: var(--c3);
+            font-size: 10px
+        }
+
+        .phase-status-warn {
+            color: var(--c6);
+            font-size: 10px
+        }
+
+        .phase-status-error {
+            color: var(--c5);
+            font-size: 10px
+        }
+
+        .phase-chevron {
+            color: var(--muted);
+            font-size: 10px;
+            transition: transform .2s
+        }
+
+        .phase-chevron.open {
+            transform: rotate(180deg)
+        }
+
+        .phase-body {
+            display: none;
+            padding: 10px 14px;
+            background: var(--bg1);
+            border-top: 1px solid var(--border);
+        }
+
+        .phase-body.open {
+            display: block
+        }
+
+        .phase-line {
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.85;
+            color: var(--text);
+            white-space: pre;
+        }
+
+        .phase-line.divider {
+            color: var(--muted);
+            opacity: .4
+        }
+
+        .phase-line.ok-line {
+            color: var(--c3)
+        }
+
+        .phase-line.err-line {
+            color: var(--c5)
+        }
+
+        .phase-line.warn-line {
+            color: var(--c6)
+        }
+
+        .phase-errors {
+            margin-top: 8px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            background: rgba(248, 113, 113, .06);
+            border: 1px solid rgba(248, 113, 113, .2)
+        }
+
+        .phase-err-line {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--c5);
+            line-height: 1.7
+        }
+
+        /* tokens table */
+        .tok-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--mono);
+            font-size: 11px
+        }
+
+        .tok-table th {
+            padding: 6px 10px;
+            text-align: left;
+            color: var(--muted);
+            font-weight: 500;
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg1)
+        }
+
+        .tok-table td {
+            padding: 5px 10px;
+            border-bottom: 1px solid rgba(30, 40, 64, .5);
+            line-height: 1.6
+        }
+
+        .tok-table tr:hover td {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .tok-type {
+            color: var(--c2);
+            font-weight: 500
+        }
+
+        .tok-val {
+            color: var(--c3)
+        }
+
+        .tok-loc {
+            color: var(--muted);
+            font-size: 10px
+        }
+
+        .tok-kw {
+            color: var(--c2)
+        }
+
+        .tok-op {
+            color: var(--c1)
+        }
+
+        .tok-num {
+            color: var(--c4)
+        }
+
+        .tok-id {
+            color: var(--text)
+        }
+
+        .tok-punct {
+            color: var(--muted)
+        }
+
+        /* before/after diff */
+        .diff-wrap {
+            margin-bottom: 16px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border)
+        }
+
+        .diff-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 12px;
+            background: var(--bg3);
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .diff-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr
+        }
+
+        .diff-col {
+            padding: 8px 12px;
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.8
+        }
+
+        .diff-col-head {
+            padding: 4px 12px;
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .diff-removed {
+            background: rgba(248, 113, 113, .08);
+            color: var(--c5)
+        }
+
+        .diff-added {
+            background: rgba(52, 211, 153, .08);
+            color: var(--c3)
+        }
+
+        .diff-same {
+            color: var(--muted)
+        }
+
+        .diff-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--c1);
+            padding: 8px;
+            background: var(--bg3)
+        }
+
+        /* block opt */
+        .bopt-block {
+            margin-bottom: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border)
+        }
+
+        .bopt-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 12px;
+            background: var(--bg3);
+            font-family: var(--mono);
+            font-size: 11px
+        }
+
+        .bopt-name {
+            color: var(--c1);
+            font-weight: 700
+        }
+
+        .bopt-badge {
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 10px
+        }
+
+        .bopt-badge.improved {
+            background: rgba(52, 211, 153, .15);
+            color: var(--c3);
+            border: 1px solid rgba(52, 211, 153, .3)
+        }
+
+        .bopt-badge.clean {
+            background: var(--bg4);
+            color: var(--muted);
+            border: 1px solid var(--border)
+        }
+
+        .bopt-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--border)
+        }
+
+        .bopt-col {
+            padding: 8px 12px
+        }
+
+        .bopt-col-head {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .bopt-line {
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.8;
+            color: var(--text)
+        }
+
+        .bopt-removed {
+            color: var(--c5);
+            text-decoration: line-through;
+            opacity: .6
+        }
+
+        .bopt-added {
+            color: var(--c3)
+        }
+
+        .bopt-changes {
+            padding: 6px 12px;
+            border-top: 1px solid var(--border);
+            background: var(--bg0)
+        }
+
+        .bopt-change-line {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--c4);
+            line-height: 1.7
+        }
+
         ::-webkit-scrollbar {
             width: 4px;
             height: 4px
@@ -972,6 +1328,57 @@
         ::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 2px
+        }
+    </style>
+
+    <style>
+        /* sidebar visibility fix */
+        .sb-title {
+            color: #4a90a4 !important;
+        }
+
+        .sb-item {
+            color: #8ba3b8 !important;
+        }
+
+        .sb-item:hover {
+            color: #e2e8f0 !important;
+        }
+
+        .sb-item.active {
+            color: var(--c1) !important;
+        }
+
+        .sb-feat-row {
+            color: #8ba3b8 !important;
+        }
+
+        .sb-bottom-row {
+            color: #8ba3b8 !important;
+        }
+
+        .sb-bottom-row kbd {
+            color: #c8d6e5 !important;
+        }
+
+        .hdr-hint {
+            color: #8ba3b8 !important;
+        }
+
+        .cbar-right {
+            color: #8ba3b8 !important;
+        }
+
+        .otab {
+            color: #8ba3b8 !important;
+        }
+
+        .otab:hover {
+            color: #e2e8f0 !important;
+        }
+
+        .otab.active {
+            color: #e2e8f0 !important;
         }
     </style>
 </head>
@@ -1104,45 +1511,74 @@
                 <!-- OUTPUT -->
                 <div class="pane-right">
                     <div class="otabs" id="otabs">
-                        <div class="otab active" onclick="showTab('ir',this)">
+                        <div class="otab active" onclick="showTab('trace',this)">
+                            <div class="odot" style="background:var(--c1)"></div>
+                            Pipeline Trace
+                            <div class="badge" id="badge-trace">—</div>
+                        </div>
+                        <div class="otab" onclick="showTab('tokens',this)">
+                            <div class="odot" style="background:var(--c2)"></div>
+                            1. Tokens
+                            <div class="badge" id="badge-tokens">—</div>
+                        </div>
+                        <div class="otab" onclick="showTab('ir',this)">
                             <div class="odot" style="background:var(--c3)"></div>
-                            IR / 3AC
+                            2. IR / 3AC
                             <div class="badge" id="badge-ir">—</div>
+                        </div>
+                        <div class="otab" onclick="showTab('opt-diff',this)">
+                            <div class="odot" style="background:var(--c3)"></div>
+                            3. Before/After
+                        </div>
+                        <div class="otab" onclick="showTab('block-opt',this)">
+                            <div class="odot" style="background:var(--c4)"></div>
+                            4. Block Opt
+                            <div class="badge" id="badge-cfg">—</div>
                         </div>
                         <div class="otab" onclick="showTab('x86',this)">
                             <div class="odot" style="background:var(--c4)"></div>
-                            x86-64
-                            <div class="badge" id="badge-x86">NEW</div>
-                        </div>
-                        <div class="otab" onclick="showTab('cfg',this)">
-                            <div class="odot" style="background:var(--c2)"></div>
-                            CFG
-                            <div class="badge" id="badge-cfg">—</div>
+                            5. x86-64
+                            <div class="badge" id="badge-x86">—</div>
                         </div>
                         <div class="otab" onclick="showTab('ast-img',this)">
                             <div class="odot" style="background:var(--c1)"></div>
-                            AST
+                            6. AST
                         </div>
                         <div class="otab" onclick="showTab('cfg-img',this)">
                             <div class="odot" style="background:var(--c6)"></div>
-                            CFG
+                            7. CFG
                         </div>
                     </div>
 
                     <div class="out-body">
-                        <div id="p-ir" class="opanel show">
+                        <div id="p-trace" class="opanel show">
                             <div class="empty">
-                                <div class="empty-icon">⟩_</div>Run compiler to see IR output
+                                <div class="empty-icon">▶</div>Run compiler to see full pipeline trace
+                            </div>
+                        </div>
+                        <div id="p-tokens" class="opanel">
+                            <div class="empty">
+                                <div class="empty-icon">⟩_</div>Run compiler to see token stream
+                            </div>
+                        </div>
+                        <div id="p-ir" class="opanel">
+                            <div class="empty">
+                                <div class="empty-icon">⟩_</div>IR output appears here
+                            </div>
+                        </div>
+                        <div id="p-opt-diff" class="opanel">
+                            <div class="empty">
+                                <div class="empty-icon">⟳</div>Before/after optimization appears here
+                            </div>
+                        </div>
+                        <div id="p-block-opt" class="opanel">
+                            <div class="empty">
+                                <div class="empty-icon">⬡</div>Per-block optimization appears here
                             </div>
                         </div>
                         <div id="p-x86" class="opanel">
                             <div class="empty">
                                 <div class="empty-icon">⚙</div>x86-64 assembly appears here
-                            </div>
-                        </div>
-                        <div id="p-cfg" class="opanel">
-                            <div class="empty">
-                                <div class="empty-icon">⬡</div>CFG blocks appear here
                             </div>
                         </div>
                         <div id="p-ast-img" class="oimg">
@@ -1220,6 +1656,9 @@
             el?.classList.add('active');
         }
 
+        // start on tokens tab after compile
+        function switchToTokens() { showTab('tokens', document.querySelector('.otab')); }
+
         // ── IR CLASSIFIER ────────────────────────────────────────────────
         function irCls(line) {
             if (/^LABEL/.test(line)) return 'cl';
@@ -1276,6 +1715,88 @@
             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
+        // ── PIPELINE TRACE ───────────────────────────────────────────
+        function renderTrace(phases) {
+            if (!phases || !phases.length)
+                return '<div class="empty"><div class="empty-icon">▶</div>No trace data</div>';
+            const statusLabel = {
+                ok: '<span class="phase-status-ok">✓ passed</span>',
+                warn: '<span class="phase-status-warn">⚠ warnings</span>',
+                error: '<span class="phase-status-error">✗ error</span>',
+            };
+            return phases.map((p, idx) => {
+                const id = `phase-body-${idx}`;
+                const lines = p.lines.map(line => {
+                    if (line.startsWith('✓')) return `<div class="phase-line ok-line">${esc(line)}</div>`;
+                    if (line.startsWith('✗')) return `<div class="phase-line err-line">${esc(line)}</div>`;
+                    if (line.includes('⚠')) return `<div class="phase-line warn-line">${esc(line)}</div>`;
+                    if (/^[-─]+$/.test(line.trim())) return `<div class="phase-line divider">${esc(line)}</div>`;
+                    return `<div class="phase-line">${esc(line)}</div>`;
+                }).join('');
+                const errHtml = (p.errors || []).length
+                    ? `<div class="phase-errors">${p.errors.map(e => `<div class="phase-err-line">• ${esc(e)}</div>`).join('')}</div>` : '';
+                return `<div class="phase-card fi" style="animation-delay:${idx * 60}ms">
+            <div class="phase-head" onclick="togglePhase('${id}',this)">
+              <div class="phase-num ${p.status}">${p.num}</div>
+              <span class="phase-title">${esc(p.name)}</span>
+              ${statusLabel[p.status] || ''}
+              <span class="phase-chevron" id="chev-${id}">▼</span>
+            </div>
+            <div class="phase-body" id="${id}">${lines}${errHtml}</div>
+          </div>`;
+            }).join('');
+        }
+        function togglePhase(id) {
+            const body = document.getElementById(id);
+            const chev = document.getElementById('chev-' + id);
+            body.classList.toggle('open');
+            chev.classList.toggle('open');
+        }
+        function openAllPhases() {
+            document.querySelectorAll('.phase-body').forEach(b => b.classList.add('open'));
+            document.querySelectorAll('.phase-chevron').forEach(c => c.classList.add('open'));
+        }
+
+        // ── TOKEN TABLE ──────────────────────────────────────────────
+        function renderTokens(tokens) {
+            if (!tokens || !tokens.length) return '<div class="empty"><div class="empty-icon">⟩_</div>No tokens</div>';
+            const KW = new Set(['INT', 'FLOAT_TYPE', 'IF', 'ELSE', 'WHILE', 'FOR', 'DEF', 'RETURN', 'PRINT']);
+            const OP = new Set(['PLUS', 'MINUS', 'MUL', 'DIV', 'MOD', 'ASSIGN', 'EQ', 'NEQ', 'LT', 'GT', 'LTE', 'GTE']);
+            const NU = new Set(['INTEGER', 'FLOAT']);
+            const PU = new Set(['SEMI', 'COMMA', 'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'LBRACKET', 'RBRACKET']);
+            function tc(t) { if (KW.has(t)) return 'tok-kw'; if (OP.has(t)) return 'tok-op'; if (NU.has(t)) return 'tok-num'; if (PU.has(t)) return 'tok-punct'; return 'tok-id'; }
+            const rows = tokens.map((t, i) => `<tr><td style="color:var(--muted);font-size:10px">${i + 1}</td><td><span class="tok-type ${tc(t.type)}">${esc(t.type)}</span></td><td><span class="tok-val">${esc(String(t.value))}</span></td><td class="tok-loc">L${t.line}:${t.col}</td></tr>`).join('');
+            return `<div style="margin-bottom:8px;font-family:var(--mono);font-size:10px;color:var(--muted);padding:4px 6px;background:var(--bg3);border-radius:4px;border:1px solid var(--border)">Phase 1 — Lexer · ${tokens.length} tokens</div><table class="tok-table"><thead><tr><th>#</th><th>Type</th><th>Value</th><th>Location</th></tr></thead><tbody>${rows}</tbody></table>`;
+        }
+
+        // ── BEFORE/AFTER DIFF ────────────────────────────────────────
+        function renderDiff(before, after) {
+            if (!before || !after) return '<div class="empty"><div class="empty-icon">⟳</div>No data</div>';
+            const maxLen = Math.max(before.length, after.length);
+            let bHtml = '', aHtml = '';
+            for (let i = 0; i < maxLen; i++) {
+                const b = before[i] || '', a = after[i] || '';
+                if (b === a) { bHtml += `<div class="diff-same">${esc(b)}</div>`; aHtml += `<div class="diff-same">${esc(a)}</div>`; }
+                else if (!a) { bHtml += `<div class="diff-removed">- ${esc(b)}</div>`; }
+                else if (!b) { aHtml += `<div class="diff-added">+ ${esc(a)}</div>`; }
+                else { bHtml += `<div class="diff-removed">- ${esc(b)}</div>`; aHtml += `<div class="diff-added">+ ${esc(a)}</div>`; }
+            }
+            const removed = before.length - after.length;
+            return `<div class="diff-wrap fi"><div class="diff-head"><span style="color:var(--c1)">Before vs After</span><span style="color:var(--c3);font-size:10px">${removed > 0 ? removed + ' removed' : 'no change'}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)"><div class="diff-col-head" style="color:var(--c5)">Before</div><div class="diff-col-head" style="color:var(--c3);border-left:1px solid var(--border)">After</div></div><div style="display:grid;grid-template-columns:1fr 1fr"><div class="diff-col">${bHtml}</div><div class="diff-col" style="border-left:1px solid var(--border)">${aHtml}</div></div></div>`;
+        }
+
+        // ── PER-BLOCK OPTIMIZATION ────────────────────────────────────
+        function renderBlockOpt(blockOpts) {
+            if (!blockOpts || !blockOpts.length) return '<div class="empty"><div class="empty-icon">⬡</div>No block data</div>';
+            return blockOpts.map(b => {
+                const badge = b.improved ? `<span class="bopt-badge improved">optimized</span>` : `<span class="bopt-badge clean">no change</span>`;
+                const bLines = b.before.map(l => `<div class="bopt-line ${b.after.includes(l) ? '' : 'bopt-removed'}">${esc(l)}</div>`).join('');
+                const aLines = b.after.map(l => `<div class="bopt-line ${b.before.includes(l) ? '' : 'bopt-added'}">${esc(l)}</div>`).join('');
+                const ch = b.changes.length ? `<div class="bopt-changes">${b.changes.map(c => `<div class="bopt-change-line">⚡ ${esc(c.trim())}</div>`).join('')}</div>` : '';
+                return `<div class="bopt-block fi"><div class="bopt-head"><span class="bopt-name">${esc(b.name)}</span>${badge}<span style="color:var(--muted);font-size:10px;margin-left:auto">${b.before.length}→${b.after.length}</span></div><div class="bopt-cols"><div class="bopt-col"><div class="bopt-col-head">Before</div>${bLines}</div><div class="bopt-col" style="border-left:1px solid var(--border)"><div class="bopt-col-head">After</div>${aLines}</div></div>${ch}</div>`;
+            }).join('');
+        }
+
         // ── COMPILE ──────────────────────────────────────────────────────
         async function compile() {
             const btn = document.getElementById('run-btn');
@@ -1324,15 +1845,29 @@
                     sa.className = 'status-area status-ok'; sa.style.display = 'flex';
                     smsg.textContent = `compiled in ${ms}ms`;
                     sbar.className = 'sbar';
-                    sb.textContent = `${data.ir.length} IR instructions · ${data.cfg.length} CFG blocks · ${data.x86.split('\n').length} ASM lines · ${ms}ms`;
+                    const irLen  = (data.ir  || []).length;
+                    const cfgLen = (data.cfg || []).length;
+                    const x86Str = (typeof data.x86 === 'string') ? data.x86 : '';
+                    sb.textContent = `${irLen} IR instructions · ${cfgLen} CFG blocks · ${x86Str.split('\n').length} ASM lines · ${ms}ms`;
                     cbr.textContent = `${editor.lineCount()} lines`;
 
                     // update badges
-                    document.getElementById('badge-ir').textContent = data.ir.length;
-                    document.getElementById('badge-cfg').textContent = data.cfg.length;
-                    document.getElementById('badge-x86').textContent = data.x86.split('\n').filter(l => l.trim()).length + 'L';
+                    document.getElementById('badge-ir').textContent  = irLen;
+                    document.getElementById('badge-cfg').textContent = cfgLen;
+                    document.getElementById('badge-x86').textContent = x86Str.split('\n').filter(l => l.trim()).length + 'L';
 
-                    // warnings
+                    // parse warnings (recovered errors — compilation continued)
+                    const parseWarnHtml = (data.parse_warnings || []).length
+                        ? `<div style="border-radius:6px;overflow:hidden;margin-bottom:10px;border:1px solid rgba(251,146,60,.3)">
+             <div style="background:rgba(251,146,60,.1);padding:7px 12px;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--c4)">
+               ⚠ Parse errors recovered — compilation continued with best guess
+             </div>
+             <div style="padding:6px 12px">
+               ${data.parse_warnings.map(w => `<div style="font-family:var(--mono);font-size:11px;color:var(--c4);line-height:1.8;padding:2px 0">${esc(w)}</div>`).join('')}
+             </div>
+           </div>` : '';
+
+                    // semantic warnings
                     const warnHtml = (data.warnings || []).length
                         ? data.warnings.map(w => `<div class="warn-box fi">⚠ ${esc(w)}</div>`).join('') : '';
 
@@ -1341,7 +1876,7 @@
                         ? data.errors.map(e => `<div class="warn-box fi" style="border-color:rgba(248,113,113,.2);color:var(--c5)">✕ [${esc(e.stage)}] ${esc(e.message)}</div>`).join('') : '';
 
                     // IR tab
-                    document.getElementById('p-ir').innerHTML = errHtml + warnHtml +
+                    document.getElementById('p-ir').innerHTML = parseWarnHtml + errHtml + warnHtml +
                         data.ir.map((line, i) => `
           <div class="ir-line fi" style="animation-delay:${Math.min(i * 6, 300)}ms">
             <span class="ir-ln">${i + 1}</span>
@@ -1352,20 +1887,9 @@
                     document.getElementById('p-x86').innerHTML =
                         `<div style="margin-bottom:10px;font-family:var(--mono);font-size:10px;color:var(--muted);padding:4px 6px;background:var(--bg3);border-radius:4px;border:1px solid var(--border)">
            ⚙ x86-64 · NASM syntax · register allocator active
-         </div>` + renderAsm(data.x86);
+         </div>` + renderAsm(x86Str);
 
-                    // CFG tab
-                    document.getElementById('p-cfg').innerHTML =
-                        data.cfg.map(b => `
-          <div class="cfg-block fi">
-            <div class="cfg-head">
-              <span class="cfg-name">${esc(b.name)}</span>
-              <span class="cfg-succ">→ ${b.successors.length ? b.successors.join(' · ') : 'exit'}</span>
-            </div>
-            <div class="cfg-body">
-              ${b.instructions.map(i => `<div class="ir-line"><span class="ir-text ${irCls(i)}">${esc(i)}</span></div>`).join('')}
-            </div>
-          </div>`).join('');
+                    // CFG blocks shown in block-opt tab
 
                     // images
                     const ts = Date.now();
@@ -1373,10 +1897,35 @@
                         `<img src="/image/ast?t=${ts}" class="fi" alt="AST">`;
                     document.getElementById('p-cfg-img').innerHTML =
                         `<img src="/image/cfg?t=${ts}" class="fi" alt="CFG">`;
+
+                    // pipeline trace
+                    document.getElementById('p-trace').innerHTML =
+                        `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+           <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">
+             Click a phase to expand · ${(data.pipeline_trace || []).length} phases completed
+           </div>
+           <button onclick="openAllPhases()" style="font-family:var(--mono);font-size:10px;color:var(--c1);background:none;border:1px solid rgba(0,212,255,.3);padding:3px 10px;border-radius:4px;cursor:pointer">
+             expand all
+           </button>
+         </div>` + renderTrace(data.pipeline_trace);
+                    document.getElementById('badge-trace').textContent = (data.pipeline_trace || []).length;
+
+                    // tokens
+                    document.getElementById('p-tokens').innerHTML = renderTokens(data.tokens);
+                    document.getElementById('badge-tokens').textContent = (data.tokens || []).length;
+
+                    // before/after diff
+                    document.getElementById('p-opt-diff').innerHTML =
+                        renderDiff(data.ir_before, data.ir_after);
+
+                    // per-block optimization
+                    document.getElementById('p-block-opt').innerHTML =
+                        renderBlockOpt(data.block_opts);
                 }
             } catch (e) {
                 sa.className = 'status-area status-err'; sa.style.display = 'flex';
-                smsg.textContent = 'network error';
+                smsg.textContent = 'error: ' + e.message;
+                console.error('COMPILE ERROR (full):', e);
             }
             btn.classList.remove('loading');
         }

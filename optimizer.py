@@ -156,3 +156,94 @@ class IROptimizer:
         code = self.dead_code_elimination(code)
         for c in code: print(c)
         return code
+
+
+# ============================================================
+# PER-BLOCK OPTIMIZER  (Feature 2)
+# Runs constant propagation + dead code elimination
+# independently on each basic block's instructions
+# ============================================================
+
+class BlockOptimizer:
+    """Optimizes each CFG basic block independently."""
+
+    def optimize_block(self, instructions):
+        """
+        Takes a list of IR instruction strings for one block.
+        Returns optimized list + a report of what changed.
+        """
+        import re
+        original = list(instructions)
+        code     = list(instructions)
+        changes  = []
+
+        # ── Step 1: Constant propagation within block ──────────
+        constants = {}
+        propagated = []
+        for line in code:
+            parts = line.split()
+            # detect  x = <number>
+            if len(parts) == 3 and parts[1] == "=":
+                try:
+                    float(parts[2])
+                    constants[parts[0]] = parts[2]
+                    propagated.append(line)
+                    continue
+                except ValueError:
+                    pass
+            # replace known constants
+            new_line = line
+            for var, val in constants.items():
+                new_line = re.sub(rf'\b{re.escape(var)}\b', str(val), new_line)
+            if new_line != line:
+                changes.append(f"  propagated: '{line}' → '{new_line}'")
+            propagated.append(new_line)
+        code = propagated
+
+        # ── Step 2: Dead code elimination within block ─────────
+        used      = set()
+        keep      = []
+        ALWAYS_KEEP = ("PRINT","RETURN","FUNC","END_FUNC",
+                       "PARAM","ARRAY","LABEL","GOTO","IFNOT")
+
+        for line in reversed(code):
+            if any(line.startswith(k) for k in ALWAYS_KEEP):
+                keep.insert(0, line)
+                # mark rhs vars as used
+                for tok in line.split()[1:]:
+                    if tok.isidentifier():
+                        used.add(tok)
+                continue
+
+            parts = line.replace("=", " = ").split()
+            if "=" in parts:
+                lhs      = parts[0]
+                rhs_vars = [p for p in parts[2:]
+                            if p.isidentifier() and not p.replace(".","").isdigit()]
+                if lhs in used:
+                    keep.insert(0, line)
+                    used.update(rhs_vars)
+                else:
+                    changes.append(f"  removed dead: '{line}'")
+            else:
+                keep.insert(0, line)
+
+        return keep, original, changes
+
+    def optimize_all_blocks(self, blocks):
+        """
+        Takes a list of BasicBlock objects.
+        Returns list of dicts with before/after/changes per block.
+        """
+        results = []
+        for block in blocks:
+            lines_before = [str(i) for i in block.instructions]
+            lines_after, original, changes = self.optimize_block(lines_before)
+            results.append({
+                "name":    block.name,
+                "before":  lines_before,
+                "after":   lines_after,
+                "changes": changes,
+                "improved": lines_before != lines_after,
+            })
+        return results
